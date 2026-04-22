@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCkurKY | Ücretsiz Profesyonel Teknoloji Desteği</title>
+    <title>PCkurKY | Profesyonel Destek & AI</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --purple: #7000ff; --bg: #0a0b10; }
@@ -11,13 +11,12 @@
         .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
         header { text-align: center; padding: 40px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(0,242,255,0.2); }
         h1 { font-family: 'JetBrains Mono'; font-size: 2.5rem; background: linear-gradient(90deg, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-        .service-card { background: rgba(255,255,255,0.05); margin-top: 20px; padding: 20px; border-radius: 15px; border-left: 5px solid var(--neon); }
         .ai-box { background: #161b22; padding: 20px; border-radius: 15px; margin-top: 30px; border: 1px dashed var(--neon); }
-        input { width: calc(100% - 110px); padding: 12px; border-radius: 8px; border: none; background: #21262d; color: white; margin-right: 10px; }
-        button { padding: 12px 20px; border-radius: 8px; border: none; background: var(--neon); color: black; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .input-group { display: flex; gap: 10px; margin-top: 15px; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: none; background: #21262d; color: white; }
+        button { padding: 12px 25px; border-radius: 8px; border: none; background: var(--neon); color: black; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { box-shadow: 0 0 15px var(--neon); transform: scale(1.05); }
-        #response { margin-top: 20px; font-size: 0.9rem; color: #ccc; line-height: 1.6; min-height: 50px; }
-        .contact-info { text-align: center; margin-top: 40px; font-size: 0.8rem; opacity: 0.7; }
+        #response { margin-top: 20px; font-size: 0.9rem; color: #ccc; line-height: 1.6; white-space: pre-wrap; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; }
         .free-tag { color: #00ff88; font-weight: bold; }
     </style>
 </head>
@@ -27,67 +26,69 @@
     <header>
         <h1>PCkurKY</h1>
         <p>OS Yapımcısı Burak'tan Ücretsiz Teknik Destek</p>
-        <p class="free-tag">⚠️ TÜM HİZMETLER TEST SÜRECİNDE ÜCRETSİZDİR!</p>
+        <p class="free-tag">⚠️ TÜM HİZMETLER ÜCRETSİZDİR!</p>
     </header>
 
-    <div class="service-card">
-        <h3>🚀 Sunulan Hizmetler</h3>
-        <ul>
-            <li>Windows 10/11 ISO Kurulum ve Optimizasyon</li>
-            <li>Office 2024 Katılımsız Kurulum</li>
-            <li>Sanal Disk (VHD) Yapılandırma (246GB - 1TB)</li>
-            <li>7/24 Teknik Danışmanlık</li>
-        </ul>
-    </div>
-
     <div class="ai-box">
-        <h3>🤖 PCkurKY AI Destek</h3>
-        <p style="font-size: 0.8rem; opacity: 0.8;">Bilgisayarınla ilgili bir sorun yaz, anında çözüm al:</p>
-        <input type="text" id="userInput" placeholder="Örn: Mavi ekran hatası alıyorum...">
-        <button onclick="askAI()">SOR</button>
+        <h3>🤖 PCkurKY Akıllı Asistan (Gemini)</h3>
+        <p style="font-size: 0.8rem; opacity: 0.8;">Bilgisayarınla ilgili her şeyi sorabilirsin:</p>
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="Örn: Windows nasıl hızlandırılır?">
+            <button id="askBtn">SOR</button>
+        </div>
         <div id="response">Cevap bekliyor...</div>
-    </div>
-
-    <div class="contact-info">
-        <p>WhatsApp: +90 551 001 47 48 | Insta: @PCkurKY</p>
-        <p>© 2026 PCkurKY - Tüm Hakları Saklıdır.</p>
     </div>
 </div>
 
-<script>
-    async function askAI() {
-        const input = document.getElementById('userInput').value;
-        const display = document.getElementById('response');
-        
-        if(!input) return;
-        display.innerHTML = "<i>PCkurKY AI düşünüyor...</i>";
+<script type="importmap">
+  {
+    "imports": {
+      "@google/generative-ai": "https://esm.run/@google/generative-ai"
+    }
+  }
+</script>
+
+<script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    // Firebase'den aldığın AI Key
+    const API_KEY = "AIzaSyAFtCQjGACAmoOSEIazC648I1BaLPkT8-U";
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    const askBtn = document.getElementById('askBtn');
+    const userInput = document.getElementById('userInput');
+    const responseDiv = document.getElementById('response');
+
+    async function runChat() {
+        const prompt = userInput.value;
+        if (!prompt) return;
+
+        responseDiv.innerHTML = "<i>PCkurKY AI analiz ediyor...</i>";
 
         try {
-            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": "Bearer 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",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "model": "google/gemini-2.0-flash-001",
-                    "messages": [
-                        {"role": "system", "content": "Sen PCkurKY markasının yapay zeka asistanısın. Burak tarafından geliştirildin. Bilgisayar teknik desteği konusunda uzman, nazik ve yardımsever olmalısın."},
-                        {"role": "user", "content": input}
-                    ]
-                })
-            });
+            // Gemini 1.5 Flash modelini kullanıyoruz (Hızlı ve ücretsiz kota dostu)
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-            const data = await res.json();
-            if(data.choices && data.choices[0]) {
-                display.innerText = data.choices[0].message.content;
-            } else {
-                display.innerText = "Hata: API'den yanıt alınamadı.";
-            }
-        } catch (err) {
-            display.innerText = "Bağlantı hatası! Lütfen internetini kontrol et.";
+            const result = await model.generateContent(`
+                Sen PCkurKY markasının resmi yapay zeka asistanısın. 
+                Burak (13 yaşında bir yazılımcı) tarafından geliştirildin. 
+                Bilgisayar teknik desteği, ISO kurulumu ve yazılım konularında uzmansın. 
+                Kısa ve öz cevaplar ver. Soru: ${prompt}
+            `);
+            
+            const response = await result.response;
+            const text = response.text();
+            responseDiv.innerText = text;
+        } catch (error) {
+            console.error(error);
+            responseDiv.innerText = "Hata: API anahtarı geçersiz olabilir veya kota dolmuş olabilir.";
         }
     }
+
+    askBtn.addEventListener('click', runChat);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') runChat();
+    });
 </script>
 
 </body>
