@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCkurKY | Profesyonel Destek & AI</title>
+    <title>PCkurKY | GPT Destekli Teknik Servis</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --purple: #7000ff; --bg: #0a0b10; }
@@ -17,77 +17,67 @@
         button { padding: 12px 25px; border-radius: 8px; border: none; background: var(--neon); color: black; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { box-shadow: 0 0 15px var(--neon); transform: scale(1.05); }
         #response { margin-top: 20px; font-size: 0.9rem; color: #ccc; line-height: 1.6; white-space: pre-wrap; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; }
-        .free-tag { color: #00ff88; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>PCkurKY</h1>
-        <p>OS Yapımcısı Burak'tan Ücretsiz Teknik Destek</p>
-        <p class="free-tag">⚠️ TÜM HİZMETLER ÜCRETSİZDİR!</p>
+        <h1>PCkurKY GPT</h1>
+        <p>Burak tarafından geliştirilen OpenAI destekli teknik asistan</p>
     </header>
 
     <div class="ai-box">
-        <h3>🤖 PCkurKY Akıllı Asistan (Gemini)</h3>
-        <p style="font-size: 0.8rem; opacity: 0.8;">Bilgisayarınla ilgili her şeyi sorabilirsin:</p>
+        <h3>🤖 GPT-4o Teknik Destek</h3>
         <div class="input-group">
-            <input type="text" id="userInput" placeholder="Örn: Windows nasıl hızlandırılır?">
-            <button id="askBtn">SOR</button>
+            <input type="text" id="userInput" placeholder="Sorununu buraya yaz...">
+            <button id="askBtn">GÖNDER</button>
         </div>
-        <div id="response">Cevap bekliyor...</div>
+        <div id="response">Yanıt bekleniyor...</div>
     </div>
 </div>
 
-<script type="importmap">
-  {
-    "imports": {
-      "@google/generative-ai": "https://esm.run/@google/generative-ai"
-    }
-  }
-</script>
+<script>
+    const API_KEY = "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";
 
-<script type="module">
-    import { GoogleGenerativeAI } from "@google/generative-ai";
-
-    // Firebase'den aldığın AI Key
-    const API_KEY = "AIzaSyAFtCQjGACAmoOSEIazC648I1BaLPkT8-U";
-    const genAI = new GoogleGenerativeAI(API_KEY);
-
-    const askBtn = document.getElementById('askBtn');
-    const userInput = document.getElementById('userInput');
-    const responseDiv = document.getElementById('response');
-
-    async function runChat() {
-        const prompt = userInput.value;
+    async function askGPT() {
+        const prompt = document.getElementById('userInput').value;
+        const responseDiv = document.getElementById('response');
+        
         if (!prompt) return;
-
-        responseDiv.innerHTML = "<i>PCkurKY AI analiz ediyor...</i>";
+        responseDiv.innerHTML = "<i>GPT-4o analiz ediyor...</i>";
 
         try {
-            // Gemini 1.5 Flash modelini kullanıyoruz (Hızlı ve ücretsiz kota dostu)
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "model": "gpt-4o-mini", // Daha hızlı ve ucuz model
+                    "messages": [
+                        {"role": "system", "content": "Sen PCkurKY markasının uzman teknik destek asistanısın. Burak tarafından kodlandın. Kısa, teknik ve yardımcı cevaplar ver."},
+                        {"role": "user", "content": prompt}
+                    ]
+                })
+            });
 
-            const result = await model.generateContent(`
-                Sen PCkurKY markasının resmi yapay zeka asistanısın. 
-                Burak (13 yaşında bir yazılımcı) tarafından geliştirildin. 
-                Bilgisayar teknik desteği, ISO kurulumu ve yazılım konularında uzmansın. 
-                Kısa ve öz cevaplar ver. Soru: ${prompt}
-            `);
+            const data = await res.json();
             
-            const response = await result.response;
-            const text = response.text();
-            responseDiv.innerText = text;
+            if (data.choices && data.choices[0]) {
+                responseDiv.innerText = data.choices[0].message.content;
+            } else if (data.error) {
+                responseDiv.innerText = "Hata: " + data.error.message;
+            }
         } catch (error) {
-            console.error(error);
-            responseDiv.innerText = "Hata: API anahtarı geçersiz olabilir veya kota dolmuş olabilir.";
+            responseDiv.innerText = "Bağlantı hatası! API anahtarı veya bakiye bitmiş olabilir.";
         }
     }
 
-    askBtn.addEventListener('click', runChat);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') runChat();
+    document.getElementById('askBtn').addEventListener('click', askGPT);
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') askGPT();
     });
 </script>
 
