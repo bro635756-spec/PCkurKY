@@ -2,153 +2,176 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>PCkurKY | DevStudio v5.0</title>
+    <title>PCkurKY Studio Pro | v6.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
     <style>
-        :root { --bg: #1e1e1e; --side: #252526; --accent: #007acc; --text: #cccccc; }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        :root { --bg: #1e1e1e; --side: #252526; --accent: #007acc; --text: #cccccc; --header: #3c3c3c; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         
-        /* Layout */
-        .app-container { display: flex; height: 100vh; flex-direction: column; }
-        .activity-bar { width: 50px; background: #333333; display: flex; flex-direction: column; align-items: center; padding-top: 15px; gap: 20px; }
-        .main-content { display: flex; flex: 1; overflow: hidden; }
+        /* Giriş ve Kayıt Ekranı */
+        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .auth-card { background: var(--side); padding: 30px; border-radius: 8px; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--header); }
+        .auth-card h2 { color: var(--accent); text-align: center; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        input { width: 100%; padding: 10px; background: #3c3c3c; border: 1px solid #555; color: white; border-radius: 4px; box-sizing: border-box; }
         
-        /* Sidebar */
-        .sidebar { width: 250px; background: var(--side); border-right: 1px solid #3c3c3c; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .file-list { flex: 1; overflow-y: auto; }
-        .file-item { padding: 5px 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; }
-        .file-item:hover { background: #2a2d2e; }
-        .file-item.active { background: #37373d; border-left: 2px solid var(--accent); }
+        /* IDE Layout */
+        #ide-screen { display: none; height: 100vh; flex-direction: column; }
+        .top-bar { background: var(--header); padding: 5px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .main-view { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar & Explorer */
+        .sidebar { width: 260px; background: var(--side); border-right: 1px solid var(--header); display: flex; flex-direction: column; }
+        .sidebar-title { padding: 10px; font-weight: bold; background: #2d2d2d; border-bottom: 1px solid #3c3c3c; }
+        .file-tree { flex: 1; padding: 10px; cursor: pointer; font-size: 13px; }
+        .file-item { padding: 5px; display: flex; align-items: center; gap: 8px; border-radius: 3px; }
+        .file-item:hover { background: #37373d; }
+        .file-item.active { background: #094771; }
 
-        /* Editor Area */
-        .editor-area { flex: 1; display: flex; flex-direction: column; }
-        #editor-container { flex: 1; }
-        
+        /* Package Manager Modal */
+        #package-modal { position: fixed; top: 20%; left: 30%; width: 40%; background: var(--side); border: 1px solid var(--accent); z-index: 2000; padding: 20px; display: none; border-radius: 8px; }
+        .package-list { height: 200px; overflow-y: auto; margin: 15px 0; border: 1px solid #444; padding: 10px; }
+
         /* Terminal */
-        .terminal-area { height: 200px; background: #000; border-top: 1px solid #3c3c3c; padding: 10px; font-family: 'Consolas', monospace; overflow-y: auto; }
-        .term-line { color: #00ff00; margin-bottom: 5px; font-size: 12px; }
-        .term-error { color: #f44747; }
-
-        /* Controls */
-        .header-btns { background: #1e1e1e; padding: 5px 15px; display: flex; gap: 10px; border-bottom: 1px solid #3c3c3c; }
-        .btn { background: var(--accent); color: white; border: none; padding: 5px 12px; cursor: pointer; border-radius: 2px; font-size: 12px; }
-        .btn-run { background: #28a745; }
+        .terminal { height: 180px; background: #000; border-top: 1px solid var(--header); color: #00ff00; padding: 10px; font-family: 'Consolas', monospace; overflow-y: auto; font-size: 12px; }
+        #editor-container { flex: 1; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header-btns">
-        <span style="color:var(--accent); font-weight:bold; margin-right:20px;">PCkurKY IDE v5.0</span>
-        <button class="btn btn-run" onclick="runBuild()"><i class="fas fa-play"></i> DERLE & ÇALIŞTIR</button>
-        <button class="btn" onclick="addNewFile()"><i class="fas fa-plus"></i> YENİ DOSYA</button>
-        <button class="btn" style="background:#555" onclick="downloadProject()"><i class="fas fa-download"></i> PAKET İNDİR (.DLL/.NET)</button>
+<div id="auth-screen">
+    <div class="auth-card">
+        <h2>PCkurKY Login</h2>
+        <div class="input-group"><input type="email" id="email" placeholder="E-posta"></div>
+        <div class="input-group"><input type="password" id="pass" placeholder="Şifre"></div>
+        <button class="btn" style="width:100%; background:var(--accent); padding:10px; color:white; border:none; cursor:pointer;" onclick="login()">SİSTEME GİRİŞ YAP</button>
+        <p style="font-size:11px; text-align:center; margin-top:10px;">Giriş yaparak PCkurKY .NET 10 lisansını kabul edersiniz.</p>
+    </div>
+</div>
+
+<div id="ide-screen">
+    <div class="top-bar">
+        <div><i class="fas fa-code"></i> <b>PCkurKY Studio Pro</b> - <span id="user-display">Burak</span></div>
+        <div class="header-actions">
+            <button class="btn" onclick="openPackages()" style="background:#555; color:white; border:none; padding:4px 10px; cursor:pointer;"><i class="fas fa-box"></i> PAKET SEÇ</button>
+            <button class="btn" onclick="runBuild()" style="background:#28a745; color:white; border:none; padding:4px 15px; cursor:pointer; margin-left:10px;"><i class="fas fa-play"></i> DERLE</button>
+        </div>
     </div>
 
-    <div class="main-content">
-        <div class="activity-bar">
-            <i class="fas fa-files-navigation"></i>
-            <i class="fas fa-search"></i>
-            <i class="fas fa-code-branch"></i>
-            <i class="fas fa-th-large"></i>
-        </div>
-
+    <div class="main-view">
         <div class="sidebar">
-            <div class="sidebar-header">GEZGİN (PROJECT1)</div>
-            <div class="file-list" id="fileList">
-                </div>
+            <div class="sidebar-title">ÇÖZÜM GEZGİNİ (Solution)</div>
+            <div class="file-tree" id="fileTree"></div>
         </div>
-
-        <div class="editor-area">
+        <div style="flex: 1; display: flex; flex-direction: column;">
             <div id="editor-container"></div>
-            <div class="terminal-area" id="terminal">
-                <div class="term-line">PCkurKY Derleme Motoru Hazır...</div>
-            </div>
+            <div class="terminal" id="term-out">> PCkurKY Kernel v6.0 hazır...</div>
         </div>
     </div>
 </div>
 
-<script>
-    let editor;
-    let files = {
-        'Main.xaml': '<Window x:Class="Project1.Main" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">\n  <Grid>\n    <TextBlock Text="PCkurKY OS v5.0" />\n  </Grid>\n</Window>',
-        'App.cs': 'using System;\n\nnamespace PCkurKY {\n  class Program {\n    static void Main() {\n      Console.WriteLine("C# .NET 10 Sistemi Aktif!");\n    }\n  }\n}',
-        'main.cpp': '#include <iostream>\n\nint main() {\n  std::cout << "C++ Derleyici Aktif" << std::endl;\n  return 0;\n}',
-        'AssemblyInfoPCKURKY.cs': '[assembly: AssemblyTitle("PCkurKY_Engine")]\n[assembly: AssemblyVersion("1.0.0.0")]',
-        '.gitignore': 'bin/\nobj/\n*.dll\n.vs/'
+<div id="package-modal">
+    <h3>Ayrıntılar & Paketler</h3>
+    <div class="package-list">
+        <label><input type="checkbox" checked> .NET Runtime 10.0.1 (LTS)</label><br>
+        <label><input type="checkbox"> C++ MSVC Build Tools</label><br>
+        <label><input type="checkbox"> PCkurKY.Engine.DLL v4.0</label><br>
+        <label><input type="checkbox"> Firebase SDK Core</label><br>
+        <label><input type="checkbox"> XAML Desktop UI Kit</label><br>
+        <label><input type="checkbox"> Java Virtual Machine (JVM)</label>
+    </div>
+    <button class="btn" onclick="closePackages()" style="background:var(--accent); color:white; border:none; padding:10px; width:100%;">SEÇİLENLERİ KUR</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+    // Senin Firebase Bilgilerin
+    const firebaseConfig = {
+        apiKey: "AIzaSyAFtCQjGACAmoOSEIazC648I1BaLPkT8-U",
+        authDomain: "share-your-thoughts-e15a7.firebaseapp.com",
+        databaseURL: "https://share-your-thoughts-e15a7-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "share-your-thoughts-e15a7",
+        storageBucket: "share-your-thoughts-e15a7.firebasestorage.app",
+        messagingSenderId: "137665399298",
+        appId: "1:137665399298:web:60e7087fc41db2670f751b"
     };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Global Değişkenler
+    let editor;
     let currentFile = 'App.cs';
+    let projectFiles = {
+        'Main.xaml': '<Window Title="PCkurKY App">\n  <Button Content="Tıkla" />\n</Window>',
+        'App.cs': 'using System;\n\nnamespace PCkurKY {\n  class Program {\n    static void Main() {\n      Console.WriteLine("C# .NET 10 Aktif!");\n    }\n  }\n}',
+        'main.cpp': '#include <iostream>\n\nint main() {\n  std::cout << "C++ Aktif" << std::endl;\n  return 0;\n}',
+        'AssemblyInfoPCKURKY.cs': '[assembly: AssemblyVersion("6.0.0")]',
+        '.gitignore': 'bin/\nobj/\n.dll'
+    };
 
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
-    
-    require(['vs/editor/editor.main'], function() {
-        editor = monaco.editor.create(document.getElementById('editor-container'), {
-            value: files[currentFile],
-            language: 'csharp',
-            theme: 'vs-dark',
-            automaticLayout: true,
-            fontSize: 14
-        });
-        refreshFileList();
-    });
-
-    function refreshFileList() {
-        const list = document.getElementById('fileList');
-        list.innerHTML = '';
-        Object.keys(files).forEach(f => {
-            const div = document.createElement('div');
-            div.className = `file-item ${f === currentFile ? 'active' : ''}`;
-            div.innerHTML = `<i class="fas fa-file-code"></i> ${f}`;
-            div.onclick = () => switchFile(f);
-            list.appendChild(div);
-        });
-    }
-
-    function switchFile(fileName) {
-        files[currentFile] = editor.getValue();
-        currentFile = fileName;
-        const ext = fileName.split('.').pop();
-        let lang = 'csharp';
-        if(ext === 'cpp') lang = 'cpp';
-        if(ext === 'xaml' || ext === 'xml') lang = 'xml';
+    // Giriş Fonksiyonu
+    window.login = () => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
         
-        monaco.editor.setModelLanguage(editor.getModel(), lang);
-        editor.setValue(files[fileName]);
-        refreshFileList();
+        // Simülasyon: Senin Firebase'in olduğu için direkt açıyoruz
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('ide-screen').style.display = 'flex';
+        initEditor();
+    };
+
+    function initEditor() {
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: projectFiles[currentFile],
+                language: 'csharp',
+                theme: 'vs-dark',
+                automaticLayout: true
+            });
+            renderFiles();
+        });
     }
 
-    function runBuild() {
-        const term = document.getElementById('terminal');
-        const line = document.createElement('div');
-        line.className = 'term-line';
-        line.innerText = `> [${new Date().toLocaleTimeString()}] Derleniyor: ${currentFile}...`;
-        term.appendChild(line);
+    window.renderFiles = () => {
+        const tree = document.getElementById('fileTree');
+        tree.innerHTML = '';
+        Object.keys(projectFiles).forEach(name => {
+            const div = document.createElement('div');
+            div.className = `file-item ${name === currentFile ? 'active' : ''}`;
+            div.innerHTML = `<i class="fas fa-file"></i> ${name}`;
+            div.onclick = () => {
+                projectFiles[currentFile] = editor.getValue();
+                currentFile = name;
+                editor.setValue(projectFiles[name]);
+                const lang = name.endsWith('.cpp') ? 'cpp' : name.endsWith('.xaml') ? 'xml' : 'csharp';
+                monaco.editor.setModelLanguage(editor.getModel(), lang);
+                renderFiles();
+            };
+            tree.appendChild(div);
+        });
+    };
 
+    window.runBuild = () => {
+        const out = document.getElementById('term-out');
+        out.innerHTML += `<br>> [BUILD] ${currentFile} derleniyor...`;
         setTimeout(() => {
-            const success = document.createElement('div');
-            success.className = 'term-line';
-            success.style.color = '#28a745';
-            success.innerText = `> SUCCESS: ${currentFile.split('.')[0]}.dll oluşturuldu. .NET 10 Runtime yüklendi.`;
-            term.appendChild(success);
-            term.scrollTop = term.scrollHeight;
-        }, 1500);
-    }
+            out.innerHTML += `<br>> [SUCCESS] .NET 10 Runtime ile çalıştırıldı. Çıktı: Merhaba Burak!`;
+            out.scrollTop = out.scrollHeight;
+        }, 1000);
+    };
 
-    function downloadProject() {
-        alert("PCkurKY Paket Yöneticisi: .NET 10 SDK ve Gerekli DLL paketleri sanal olarak yüklendi.");
-    }
-
-    function addNewFile() {
-        const name = prompt("Dosya adı (örn: helper.pckurky):");
-        if(name) {
-            files[name] = "// PCkurKY Özel Dosya Formatı\n";
-            refreshFileList();
-            switchFile(name);
-        }
-    }
+    window.openPackages = () => document.getElementById('package-modal').style.display = 'block';
+    window.closePackages = () => {
+        document.getElementById('package-modal').style.display = 'none';
+        document.getElementById('term-out').innerHTML += `<br>> [INFO] Seçilen paketler ve DLL dosyaları projeye dahil edildi.`;
+    };
 </script>
-
 </body>
 </html>
