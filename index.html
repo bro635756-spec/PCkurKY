@@ -2,14 +2,16 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>PCkurKY Studio Pro | v6.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>PC Kurma Sitesi | Kendi Bilgisayarını Topla - PCkurKY Studio Pro</title>
+    <meta name="description" content="En iyi PC kurma sitesi ile hayalindeki bilgisayarı topla. Uygun fiyatlı oyuncu ve iş bilgisayarı toplama sihirbazı için tıkla.">
+    <meta name="keywords" content="pc kurma sitesi, bilgisayar toplama, hazır sistemler, pc toplama sihirbazı">
+    <meta name="author" content="Burak - PCkurKY">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
-    <title>PC Kurma Sitesi | Kendi Bilgisayarını Topla - PCkurKY</title>
 
-<meta name="description" content="En iyi PC kurma sitesi ile hayalindeki bilgisayarı topla. Uygun fiyatlı oyuncu ve iş bilgisayarı toplama sihirbazı için tıkla.">
-
-<meta name="keywords" content="pc kurma sitesi, bilgisayar toplama, hazır sistemler, pc toplama sihirbazı">
     <style>
         :root { --bg: #1e1e1e; --side: #252526; --accent: #007acc; --text: #cccccc; --header: #3c3c3c; }
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
@@ -41,6 +43,8 @@
         /* Terminal */
         .terminal { height: 180px; background: #000; border-top: 1px solid var(--header); color: #00ff00; padding: 10px; font-family: 'Consolas', monospace; overflow-y: auto; font-size: 12px; }
         #editor-container { flex: 1; }
+        .btn { border-radius: 4px; transition: 0.2s; }
+        .btn:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -90,26 +94,7 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
-
-    // Senin Firebase Bilgilerin
-    const firebaseConfig = {
-        apiKey: "AIzaSyAFtCQjGACAmoOSEIazC648I1BaLPkT8-U",
-        authDomain: "share-your-thoughts-e15a7.firebaseapp.com",
-        databaseURL: "https://share-your-thoughts-e15a7-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "share-your-thoughts-e15a7",
-        storageBucket: "share-your-thoughts-e15a7.firebasestorage.app",
-        messagingSenderId: "137665399298",
-        appId: "1:137665399298:web:60e7087fc41db2670f751b"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    // Global Değişkenler
+    // Global Fonksiyonları Window Objesine Bağlayalım (Module olduğu için dışarıdan erişilemezler)
     let editor;
     let currentFile = 'App.cs';
     let projectFiles = {
@@ -120,12 +105,7 @@
         '.gitignore': 'bin/\nobj/\n.dll'
     };
 
-    // Giriş Fonksiyonu
     window.login = () => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
-        
-        // Simülasyon: Senin Firebase'in olduğu için direkt açıyoruz
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('ide-screen').style.display = 'flex';
         initEditor();
@@ -140,7 +120,7 @@
                 theme: 'vs-dark',
                 automaticLayout: true
             });
-            renderFiles();
+            window.renderFiles();
         });
     }
 
@@ -157,7 +137,7 @@
                 editor.setValue(projectFiles[name]);
                 const lang = name.endsWith('.cpp') ? 'cpp' : name.endsWith('.xaml') ? 'xml' : 'csharp';
                 monaco.editor.setModelLanguage(editor.getModel(), lang);
-                renderFiles();
+                window.renderFiles();
             };
             tree.appendChild(div);
         });
@@ -175,7 +155,7 @@
     window.openPackages = () => document.getElementById('package-modal').style.display = 'block';
     window.closePackages = () => {
         document.getElementById('package-modal').style.display = 'none';
-        document.getElementById('term-out').innerHTML += `<br>> [INFO] Seçilen paketler ve DLL dosyaları projeye dahil edildi.`;
+        document.getElementById('term-out').innerHTML += `<br>> [INFO] Paketler başarıyla güncellendi.`;
     };
 </script>
 </body>
